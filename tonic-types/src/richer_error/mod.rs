@@ -60,13 +60,18 @@ pub trait StatusExt: crate::sealed::Sealed {
     ///
     /// ```
     /// use tonic::{metadata::MetadataMap, Code, Status};
-    /// use tonic_types::{ErrorDetails, StatusExt};
+    /// use tonic_types::{ErrorDetails, LocalizedMessage, StatusExt};
     ///
     /// let status = Status::with_error_details_and_metadata(
     ///     Code::InvalidArgument,
     ///     "bad request",
-    ///     ErrorDetails::with_bad_request_violation("field", "description"),
-    ///     MetadataMap::new()
+    ///     ErrorDetails::with_bad_request_violation(
+    ///         "field",
+    ///         "description",
+    ///         "REASON",
+    ///         Some(LocalizedMessage::new("en-US", "message")),
+    ///     ),
+    ///     MetadataMap::new(),
     /// );
     /// ```
     fn with_error_details_and_metadata(
@@ -83,12 +88,17 @@ pub trait StatusExt: crate::sealed::Sealed {
     ///
     /// ```
     /// use tonic::{Code, Status};
-    /// use tonic_types::{ErrorDetails, StatusExt};
+    /// use tonic_types::{ErrorDetails, LocalizedMessage, StatusExt};
     ///
     /// let status = Status::with_error_details(
     ///     Code::InvalidArgument,
     ///     "bad request",
-    ///     ErrorDetails::with_bad_request_violation("field", "description"),
+    ///     ErrorDetails::with_bad_request_violation(
+    ///         "field",
+    ///         "description",
+    ///         "REASON",
+    ///         Some(LocalizedMessage::new("en-US", "message"))
+    ///     ),
     /// );
     /// ```
     fn with_error_details(
@@ -104,14 +114,17 @@ pub trait StatusExt: crate::sealed::Sealed {
     ///
     /// ```
     /// use tonic::{metadata::MetadataMap, Code, Status};
-    /// use tonic_types::{BadRequest, StatusExt};
+    /// use tonic_types::{BadRequest, LocalizedMessage, StatusExt};
     ///
     /// let status = Status::with_error_details_vec_and_metadata(
     ///     Code::InvalidArgument,
     ///     "bad request",
-    ///     vec![
-    ///         BadRequest::with_violation("field", "description").into(),
-    ///     ],
+    ///     vec![BadRequest::with_violation(
+    ///         "field",
+    ///         "description",
+    ///         "REASON",
+    ///         Some(LocalizedMessage::new("en-US", "message"))
+    ///     ).into()],
     ///     MetadataMap::new()
     /// );
     /// ```
@@ -129,14 +142,18 @@ pub trait StatusExt: crate::sealed::Sealed {
     ///
     /// ```
     /// use tonic::{Code, Status};
-    /// use tonic_types::{BadRequest, StatusExt};
+    /// use tonic_types::{BadRequest, LocalizedMessage, StatusExt};
     ///
     /// let status = Status::with_error_details_vec(
     ///     Code::InvalidArgument,
     ///     "bad request",
-    ///     vec![
-    ///         BadRequest::with_violation("field", "description").into(),
-    ///     ]
+    ///     vec![BadRequest::with_violation(
+    ///         "field",
+    ///         "description",
+    ///         "REASON",
+    ///         Some(LocalizedMessage::new("en-US", "message")),
+    ///     )
+    ///     .into()],
     /// );
     /// ```
     fn with_error_details_vec(
@@ -996,7 +1013,12 @@ mod tests {
             .add_quota_failure_violation("clientip:<ip address>", "description")
             .set_error_info("SOME_INFO", "example.local", metadata.clone())
             .add_precondition_failure_violation("TOS", "example.local", "description")
-            .add_bad_request_violation("field", "description")
+            .add_bad_request_violation(
+                "field",
+                "description",
+                "REASON",
+                Some(LocalizedMessage::new("en-US", "error message for the user")),
+            )
             .set_request_info("request-id", "some-request-data")
             .set_resource_info("resource-type", "resource-name", "owner", "description")
             .add_help_link("link to resource", "resource.example.local")
@@ -1014,7 +1036,13 @@ mod tests {
             QuotaFailure::with_violation("clientip:<ip address>", "description").into(),
             ErrorInfo::new("SOME_INFO", "example.local", metadata).into(),
             PreconditionFailure::with_violation("TOS", "example.local", "description").into(),
-            BadRequest::with_violation("field", "description").into(),
+            BadRequest::with_violation(
+                "field",
+                "description",
+                "REASON",
+                Some(LocalizedMessage::new("en-US", "error message for the user")),
+            )
+            .into(),
             RequestInfo::new("request-id", "some-request-data").into(),
             ResourceInfo::new("resource-type", "resource-name", "owner", "description").into(),
             Help::with_link("link to resource", "resource.example.local").into(),

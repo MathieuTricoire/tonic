@@ -1,5 +1,5 @@
 use tonic::{transport::Server, Code, Request, Response, Status};
-use tonic_types::{ErrorDetails, StatusExt};
+use tonic_types::{ErrorDetails, LocalizedMessage, StatusExt};
 
 use hello_world::greeter_server::{Greeter, GreeterServer};
 use hello_world::{HelloReply, HelloRequest};
@@ -27,9 +27,22 @@ impl Greeter for MyGreeter {
 
         // Add error details conditionally
         if name.is_empty() {
-            err_details.add_bad_request_violation("name", "name cannot be empty");
+            err_details.add_bad_request_violation(
+                "name",
+                "name cannot be empty",
+                "NAME_EMPTY",
+                Some(LocalizedMessage::new("en-US", "Name cannot be empty.")),
+            );
         } else if name.len() > 20 {
-            err_details.add_bad_request_violation("name", "name is too long");
+            err_details.add_bad_request_violation(
+                "name",
+                "name is too long",
+                "NAME_TOO_LONG",
+                Some(LocalizedMessage::new(
+                    "en-US",
+                    "Name is too long, maximum length is 20 characters.",
+                )),
+            );
         }
 
         if err_details.has_bad_request_violations() {

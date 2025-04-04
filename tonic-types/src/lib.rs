@@ -33,7 +33,7 @@
 //!
 //! ```
 //! use tonic::{Code, Status};
-//! use tonic_types::{ErrorDetails, StatusExt};
+//! use tonic_types::{ErrorDetails, LocalizedMessage, StatusExt};
 //!
 //! # async fn endpoint() -> Result<tonic::Response<()>, Status> {
 //! // ...
@@ -47,7 +47,9 @@
 //! if some_condition {
 //!     err_details.add_bad_request_violation(
 //!         "field_a",
-//!         "description of why the field_a is invalid"
+//!         "description of why the field_a is invalid",
+//!         "REASON_A",
+//!         Some(LocalizedMessage::new("en-US", "message")),
 //!     );
 //! }
 //!
@@ -56,6 +58,8 @@
 //!     err_details.add_bad_request_violation(
 //!         "field_b",
 //!         "description of why the field_b is invalid",
+//!         "REASON_B",
+//!         None,
 //!     );
 //! }
 //!

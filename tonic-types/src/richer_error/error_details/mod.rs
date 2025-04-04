@@ -229,11 +229,15 @@ impl ErrorDetails {
     /// # Examples
     ///
     /// ```
-    /// use tonic_types::{ErrorDetails, FieldViolation};
-    ///
+    /// use tonic_types::{ErrorDetails, FieldViolation, LocalizedMessage};
     /// let err_details = ErrorDetails::with_bad_request(vec![
-    ///     FieldViolation::new("field_1", "description 1"),
-    ///     FieldViolation::new("field_2", "description 2"),
+    ///     FieldViolation::new(
+    ///         "field_1",
+    ///         "description 1",
+    ///         "REASON_1",
+    ///         Some(LocalizedMessage::new("en-US", "localized message 1")),
+    ///     ),
+    ///     FieldViolation::new("field_2", "description 2", "REASON_2", None),
     /// ]);
     /// ```
     pub fn with_bad_request(field_violations: impl Into<Vec<FieldViolation>>) -> Self {
@@ -249,19 +253,28 @@ impl ErrorDetails {
     /// # Examples
     ///
     /// ```
-    /// use tonic_types::ErrorDetails;
+    /// use tonic_types::{ErrorDetails, LocalizedMessage};
     ///
     /// let err_details = ErrorDetails::with_bad_request_violation(
     ///     "field",
     ///     "description",
+    ///     "REASON",
+    ///     Some(LocalizedMessage::new("en-US", "message"))
     /// );
     /// ```
     pub fn with_bad_request_violation(
         field: impl Into<String>,
         description: impl Into<String>,
+        reason: impl Into<String>,
+        loc_message: Option<LocalizedMessage>,
     ) -> Self {
         ErrorDetails {
-            bad_request: Some(BadRequest::with_violation(field, description)),
+            bad_request: Some(BadRequest::with_violation(
+                field,
+                description,
+                reason,
+                loc_message,
+            )),
             ..ErrorDetails::new()
         }
     }
@@ -672,13 +685,13 @@ impl ErrorDetails {
     /// # Examples
     ///
     /// ```
-    /// use tonic_types::{ErrorDetails, FieldViolation};
+    /// use tonic_types::{ErrorDetails, FieldViolation, LocalizedMessage};
     ///
     /// let mut err_details = ErrorDetails::new();
     ///
     /// err_details.set_bad_request(vec![
-    ///     FieldViolation::new("field_1", "description 1"),
-    ///     FieldViolation::new("field_2", "description 2"),
+    ///     FieldViolation::new("field_1", "description 1", "REASON_1", Some(LocalizedMessage::new("en-US", "message"))),
+    ///     FieldViolation::new("field_2", "description 2", "REASON_2", None),
     /// ]);
     /// ```
     pub fn set_bad_request(&mut self, violations: impl Into<Vec<FieldViolation>>) -> &mut Self {
@@ -693,23 +706,35 @@ impl ErrorDetails {
     /// # Examples
     ///
     /// ```
-    /// use tonic_types::ErrorDetails;
+    /// use tonic_types::{ErrorDetails, LocalizedMessage};
     ///
     /// let mut err_details = ErrorDetails::new();
     ///
-    /// err_details.add_bad_request_violation("field", "description");
+    /// err_details.add_bad_request_violation(
+    ///     "field",
+    ///     "description",
+    ///     "REASON",
+    ///     Some(LocalizedMessage::new("en-US", "message")),
+    /// );
     /// ```
     pub fn add_bad_request_violation(
         &mut self,
         field: impl Into<String>,
         description: impl Into<String>,
+        reason: impl Into<String>,
+        loc_message: Option<LocalizedMessage>,
     ) -> &mut Self {
         match &mut self.bad_request {
             Some(bad_request) => {
-                bad_request.add_violation(field, description);
+                bad_request.add_violation(field, description, reason, loc_message);
             }
             None => {
-                self.bad_request = Some(BadRequest::with_violation(field, description));
+                self.bad_request = Some(BadRequest::with_violation(
+                    field,
+                    description,
+                    reason,
+                    loc_message,
+                ));
             }
         };
         self
@@ -721,13 +746,18 @@ impl ErrorDetails {
     /// # Examples
     ///
     /// ```
-    /// use tonic_types::ErrorDetails;
+    /// use tonic_types::{ErrorDetails, LocalizedMessage};
     ///
     /// let mut err_details = ErrorDetails::with_bad_request(vec![]);
     ///
     /// assert_eq!(err_details.has_bad_request_violations(), false);
     ///
-    /// err_details.add_bad_request_violation("field", "description");
+    /// err_details.add_bad_request_violation(
+    ///     "field",
+    ///     "description",
+    ///     "REASON",
+    ///     Some(LocalizedMessage::new("en-US", "message")),
+    /// );
     ///
     /// assert_eq!(err_details.has_bad_request_violations(), true);
     /// ```

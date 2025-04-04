@@ -27,9 +27,22 @@ impl Greeter for MyGreeter {
 
         // Add violations conditionally
         if name.is_empty() {
-            bad_request.add_violation("name", "name cannot be empty");
+            bad_request.add_violation(
+                "name",
+                "name cannot be empty",
+                "NAME_EMPTY",
+                Some(LocalizedMessage::new("en-US", "Name cannot be empty.")),
+            );
         } else if name.len() > 20 {
-            bad_request.add_violation("name", "name is too long");
+            bad_request.add_violation(
+                "name",
+                "name is too long",
+                "NAME_TOO_LONG",
+                Some(LocalizedMessage::new(
+                    "en-US",
+                    "Name is too long, maximum length is 20 characters.",
+                )),
+            );
         }
 
         if !bad_request.is_empty() {
